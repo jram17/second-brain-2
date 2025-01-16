@@ -29,6 +29,7 @@ export const Signin = () => {
                 password,
             });
             console.log("refresh token", response.data.refresh);
+            
             toast.success(`Welcome back, ${username}!`, {
                 action: {
                     label: <CircleX className="text-gray-500 hover:text-red-500  cursor-pointer" />,
@@ -37,6 +38,8 @@ export const Signin = () => {
                     },
                 }
             });
+            
+            navigate("/brain");
 
         } catch (error) {
             console.error("Error during sign-in:", error);

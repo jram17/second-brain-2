@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import { User } from './model/user-schema';
 import { JWT_ACCESS_PASSWORD, JWT_REFRESH_PASSWORD } from './config/configJWT';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Link } from './model/link-schema';
 import { random } from './lib/utils';
 const app = express();
@@ -51,7 +51,8 @@ app.route('/api/v1/signin')
         if (existinguser) {
             const accessToken = jwt.sign({ id: existinguser._id }, JWT_ACCESS_PASSWORD, { expiresIn: '1m' });
             const refreshToken = jwt.sign({ id: existinguser._id }, JWT_REFRESH_PASSWORD, { expiresIn: '5m' });
-            res.cookie('accessToken', accessToken, { maxAge: 1 * 60 * 1000 })
+            // res.cookie('accessToken', accessToken, { maxAge: 1 * 60 * 1000 })
+
 
             res.cookie('refreshToken', refreshToken,
                 { maxAge: 5 * 60 * 1000, httpOnly: true, secure: true, sameSite: 'strict' })
@@ -67,6 +68,25 @@ app.route('/api/v1/signin')
             });
         }
     });
+
+app.post('api/v1/refresh',async(req,res)=>{
+    const refreshToken=req.cookies.refreshToken;
+    if(!refreshToken){
+        res.status(401).json({valid:false,message:"refresh Token expired"});
+    }else{
+        try {
+            const decoded=jwt.verify(refreshToken,JWT_REFRESH_PASSWORD);
+            if(decoded){
+                const accessToken=jwt.sign({id:(decoded as JwtPayload).id},JWT_ACCESS_PASSWORD,{expiresIn:'1m'});
+                res.status(201).json({accessToken:accessToken,message:"new access token generated"});
+            }else{
+                res.status(403).json({valid:false,message:"Invalid refresh token"});
+            }
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+})
 
 app.route('/api/v1/content')
     .get(verifyuser, async (req, res) => {
@@ -98,7 +118,7 @@ app.route('/api/v1/content')
     });
 
 app.post('/api/v1/verifyJWT', verifyuser, async (req, res) => {
-    res.status(200).json({ valid: true, message: "user authorized" })
+    res.status(401).json({ valid: true, message: "user authorized" })
 });
 
 app.delete('/api/v1/:contentId', verifyuser, async (req, res) => {

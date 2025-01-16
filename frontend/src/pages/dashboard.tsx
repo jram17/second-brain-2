@@ -1,8 +1,13 @@
+import { Board } from "../components/brain-board/board";
+import { GridBackground } from "../components/ui/grid-background";
+
 const Dashboard = () => {
   return (
-    <div>
-      dashboard
-    </div>
+    <GridBackground>
+      <div >
+        <Board/>
+      </div>
+    </GridBackground>
   )
 }
 
