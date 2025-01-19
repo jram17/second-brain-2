@@ -28,7 +28,8 @@ export const Signin = () => {
                 username,
                 password,
             });
-            console.log("refresh token", response.data.refresh);
+            console.log({"response object :":response.data})
+            sessionStorage.setItem("access_token",response.data.token);
             
             toast.success(`Welcome back, ${username}!`, {
                 action: {
