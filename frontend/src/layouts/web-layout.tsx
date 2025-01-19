@@ -8,16 +8,16 @@ const WebLayout = () => {
     const axiosPrivate=useAxiosPrivate();
     const location =useLocation();
     async function checkAuth() {
-        const token = sessionStorage.getItem("access_token");
+        // const token = sessionStorage.getItem("access_token");
         // console.log("hit here");
         try {
             const response = await axiosPrivate.get(
                 "http://localhost:3000/api/v1/checkAuth",
-                {
-                    headers: {
-                        "authorization":token, 
-                    },
-                }
+                // {
+                //     headers: {
+                //         "authorization":token, 
+                //     },
+                // }
             );
 
             if (response.data.valid) {
