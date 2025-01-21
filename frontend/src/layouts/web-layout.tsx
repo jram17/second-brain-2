@@ -1,12 +1,13 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { Outlet, useNavigate ,useLocation} from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import { Header } from "../components/header";
 const WebLayout = () => {
     const navigate = useNavigate();
     axios.defaults.withCredentials = true;
-    const axiosPrivate=useAxiosPrivate();
-    const location =useLocation();
+    const axiosPrivate = useAxiosPrivate();
+    const location = useLocation();
     async function checkAuth() {
         // const token = sessionStorage.getItem("access_token");
         // console.log("hit here");
@@ -27,7 +28,7 @@ const WebLayout = () => {
             }
         } catch (error) {
             console.error("Error verifying token:", error);
-            navigate("/sign-in",{state:{from:location},replace:true});
+            navigate("/sign-in", { state: { from: location }, replace: true });
 
         }
     }
@@ -39,7 +40,9 @@ const WebLayout = () => {
 
     return (
         <div>
+            <Header />
             <Outlet />
+
         </div>
     );
 };
