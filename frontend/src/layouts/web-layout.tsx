@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { Header } from "../components/header";
+import { BASEURL } from "../config/axiosConfig";
 const WebLayout = () => {
     const navigate = useNavigate();
     axios.defaults.withCredentials = true;
@@ -13,7 +14,7 @@ const WebLayout = () => {
         // console.log("hit here");
         try {
             const response = await axiosPrivate.get(
-                "http://localhost:3000/api/v1/checkAuth",
+                `${BASEURL}/api/v1/checkAuth`
                 // {
                 //     headers: {
                 //         "authorization":token, 

@@ -8,4 +8,4 @@ const privateAxios=axios.create({
     withCredentials: true,
 })
 
-export {privateAxios}
+export {privateAxios,BASEURL}

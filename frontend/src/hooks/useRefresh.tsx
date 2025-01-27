@@ -1,10 +1,11 @@
 import axios from "axios";
+import { BASEURL } from "../config/axiosConfig";
 
 const useRefreshToken = () => {
     const refresh = async () => {
         console.log("refreshing...");
         try {
-            const response = await axios.get('http://localhost:3000/api/v1/refresh', {
+            const response = await axios.get(`${BASEURL}/api/v1/refresh`, {
                 withCredentials: true,
             });
             console.log(response.data);

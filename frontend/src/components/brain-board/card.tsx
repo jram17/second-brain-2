@@ -11,7 +11,7 @@ interface CardProps {
 function populateTweetCard(link: string) {
     const tweetId: string = link.split('/')[5];
     return (
-        <div style={{ margin: '-10px 0 0 0' /* Adjust as needed */ }}>
+        <div >
             <Tweet id={tweetId} />
         </div>
     );

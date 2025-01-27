@@ -12,6 +12,7 @@ import {
     AlertDescription,
     AlertTitle,
 } from "../components/ui/alert";
+import { BASEURL } from "../config/axiosConfig";
 export const Signin = () => {
     const usernameRef = useRef<HTMLInputElement>(null); // Ensure refs are initialized properly
     const passwordRef = useRef<HTMLInputElement>(null);
@@ -24,7 +25,7 @@ export const Signin = () => {
 
         try {
             axios.defaults.withCredentials = true;
-            const response = await axios.post("http://localhost:3000/api/v1/signin", {
+            const response = await axios.post(`${BASEURL}/api/v1/signin`, {
                 username,
                 password,
             });
