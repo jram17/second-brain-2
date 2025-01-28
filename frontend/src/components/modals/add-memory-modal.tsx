@@ -5,6 +5,7 @@ import { resetModalState } from "../../redux/Slices/modalSlice";
 import { Input } from "../input";
 import Button from "../button";
 import { BASEURL, privateAxios } from "../../config/axiosConfig";
+import { toast } from "sonner";
 
 
 
@@ -12,26 +13,58 @@ export function AddMemoryModal() {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState("Website");
     const linkRef = useRef<HTMLInputElement>();
+    const noteRef =useRef<HTMLInputElement>();
+    const handleMemory = async () => {
+        const link = linkRef.current?.value;
 
-    const handleMemory =async()=>{
-        const link=linkRef.current?.value;
-        if(link.split(".")[1] === "X"){
-           const type= "Twitter"
-        }else if (link.split(".")[1] === "youtube"){
-            const type ="YouTube";
-        }
-        else{
-            const type ="Webpage";
-        }
-        // if type is website
-        await privateAxios.post(`${BASEURL}/api/v1/content`,{
-            link,type,title
-        });
+        if (link) {
+            let type = "";
 
-        // if type is notes then dont send link
-         
-        dispatch(resetModalState());
-    }
+            if (link.includes("youtube")) {
+                type = "Youtube";
+            } else if (link.includes("x.com")) {
+                type = "Twitter";
+            } else {
+                type = "Website";
+            }
+
+            console.log("hit");
+
+            const status=await privateAxios.post(`${BASEURL}/api/v1/content`, {
+                link,
+                type
+            });
+            if(status.data.flag){
+                toast.success("Memory added successfully!",{
+                    action:{
+                        label:'cancel',
+                        onClick:()=>{}
+                    }
+                });
+            }else{
+                toast.error("Failed to add memory!");
+            }
+            
+
+            dispatch(resetModalState());
+        }else{
+            const type="Note";
+            const text=noteRef.current?.value;
+            const status=await privateAxios.post(`${BASEURL}/api/v1/content`, {
+                text,
+                type
+            });
+            if(status.data.flag){
+                toast.success("Memory added successfully!");
+            }else{
+                toast.error("Failed to add memory!");
+            }
+        }
+
+        
+    };
+
+
     return (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50"
             onClick={() => dispatch(resetModalState())}>
@@ -80,7 +113,7 @@ export function AddMemoryModal() {
                 {activeTab === "Website" && <div className="mt-4 border border-blue-100 shadow-md  p-4 rounded-md">
                     <label className=" flex items-center gap-2 pb-2 justify-start ">
                         <Link className="h-4 w-4 text-blue-500" /><div className="font-medium text-sm ">Website or Tweet </div></label>
-                    <input type="text" placeholder="https://google.com"
+                    <input ref={linkRef} type="text" placeholder="https://google.com"
                         className="w-full p-2 mt-1 border rounded-md focus:ring focus:ring-blue-300 outline-none" />
                 </div>}
 
@@ -88,23 +121,23 @@ export function AddMemoryModal() {
                     activeTab === "Notes" &&
                     <div className="mt-4 rounded-md border border-green-100 dark:border-stone-700 p-4 shadow-md dark:bg-stone-900">
                         <div className="flex gap-2 items-center">
-                            <NotebookPen className="h-4 w-4 text-green-500"/>
+                            <NotebookPen className="h-4 w-4 text-green-500" />
                             <label htmlFor="note" className="text-sm font-medium dark:text-gray-200">Note</label>
-                            </div>
-                            <textarea id="note" name="note" placeholder="Add your note" rows={3} className="mt-4 w-full p-4 border rounded-md focus:outline-zinc-900 font-semibold  ">
+                        </div>
+                        <textarea ref={noteRef} id="note" name="note" placeholder="Add your note" rows={3} className="mt-4 w-full p-4 border rounded-md focus:outline-zinc-900 font-semibold  ">
                         </textarea>
 
                     </div>
                 }
 
                 {
-                    activeTab==="Documents"&&
+                    activeTab === "Documents" &&
                     <div className="mt-4 rounded-md border border-purple-100 dark:bg-stone-900 dark:border-stone-700 p-4 shadow-md">
                         <h1 className="text-sm font-semibold dark:text-gray-300 ">working Documents</h1></div>
                 }
 
                 {
-                    activeTab==="Integrations"&&
+                    activeTab === "Integrations" &&
                     <div className="mt-4 rounded-md border border-purple-100 dark:bg-stone-900 dark:border-stone-700 p-4 shadow-md">
                         <h1 className="text-sm font-semibold dark:text-gray-300 ">Working on Integrations</h1></div>
                 }
@@ -117,7 +150,8 @@ export function AddMemoryModal() {
                             dispatch(resetModalState());
                         }}
                     ></Button>
-                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50" onClick={handleMemory()}>
+                    <button className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 disabled:opacity-50"
+                        onClick={handleMemory}>
                         Add Memory
                     </button>
                 </div>

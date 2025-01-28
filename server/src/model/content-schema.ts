@@ -1,7 +1,7 @@
 import mongoose,{model,Schema} from 'mongoose';
 
 const ContentSchema =new Schema({
-    title:String,
+    // title:String,
     link:String,
     text:String ,
     tages:[{type:mongoose.Types.ObjectId,ref:'Tag'}],
