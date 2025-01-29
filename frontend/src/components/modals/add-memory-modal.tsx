@@ -1,8 +1,8 @@
-import { act, useRef, useState } from "react";
-import { X, Globe, FileText, File, Settings, PlusCircle, Link, NotebookPen, Merge } from "lucide-react";
+import {  useRef, useState } from "react";
+import { X, Globe,  File, PlusCircle, Link, NotebookPen, Merge } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { resetModalState } from "../../redux/Slices/modalSlice";
-import { Input } from "../input";
+
 import Button from "../button";
 import { BASEURL, privateAxios } from "../../config/axiosConfig";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ export function AddMemoryModal() {
 
         if (link) {
             let type = "";
-
+            
             if (link.includes("youtube")) {
                 type = "Youtube";
             } else if (link.includes("x.com")) {
@@ -34,6 +34,8 @@ export function AddMemoryModal() {
                 link,
                 type
             });
+            dispatch(resetModalState());
+            // onMemoryAdded();
             if(status.data.flag){
                 toast.success("Memory added successfully!",{
                     action:{
@@ -46,7 +48,7 @@ export function AddMemoryModal() {
             }
             
 
-            dispatch(resetModalState());
+            
         }else{
             const type="Note";
             const text=noteRef.current?.value;
@@ -54,6 +56,8 @@ export function AddMemoryModal() {
                 text,
                 type
             });
+            dispatch(resetModalState());
+            // onMemoryAdded();
             if(status.data.flag){
                 toast.success("Memory added successfully!");
             }else{

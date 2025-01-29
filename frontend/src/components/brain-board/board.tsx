@@ -10,7 +10,7 @@ export function Board(){
     // const isModal=true;
     return (
         <div className="py-24 pl-16 gap-2 max-w-full overflow-x-hidden">
-           {isModal && <AddMemoryModal/>} 
+           {isModal && <AddMemoryModal />} 
             <Menu/>
             <Content/>
         </div>
