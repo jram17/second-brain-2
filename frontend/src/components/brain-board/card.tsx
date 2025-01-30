@@ -1,4 +1,10 @@
+import { Trash2 } from 'lucide-react';
+import { useDispatch } from 'react-redux';
 import { Tweet } from 'react-tweet';
+import useAxiosPrivate from '../../hooks/useAxiosPrivate';
+import { BASEURL } from '../../config/axiosConfig';
+import { toast } from 'sonner';
+import { toggleState } from '../../redux/Slices/contentSlice';
 
 interface CardProps {
     contentId: string;
@@ -20,8 +26,8 @@ function populateTweetCard(link: string) {
 function populateWebsiteCard(link: string) {
     return <div className='p-4'>{link}</div>
 }
-function populateNoteCard(text :string){
-    return <div className='p-4 font-normal whitespace-normal break-words overflow-auto'>{text}</div>
+function populateNoteCard(text: string) {
+    return <div className='p-5 font-normal whitespace-normal break-words overflow-auto'>{text}</div>
 }
 
 function formatDate(timestamp: Date) {
@@ -32,9 +38,36 @@ function formatDate(timestamp: Date) {
     return `Created on ${day}/${month}/${year}`;
 }
 
-export function Card({ contentId,  link, text,type, timestamp }: CardProps) {
+
+
+
+export function Card({ contentId, link, text, type, timestamp }: CardProps) {
+    const dispatch =useDispatch();
+    const axiosPrivate =useAxiosPrivate();
+    const handleDelete = async (contentId: String) => {
+        try {
+            
+            console.log(`Deleting ${contentId}`);
+            const response = await  axiosPrivate.delete(`${BASEURL}/api/v1/${contentId}`);
+            if(response.data.valid){
+                toast.success("Content deleted successfully",{
+                    action:{
+                        label:'close',
+                        onClick:()=>{}
+                    }
+                });
+                dispatch(toggleState());
+            }else{
+                toast.error("Failed to add memory!");
+            }
+        } catch (error) {
+            
+        }
+    }
+
     return (
-        <div className={`${type === "Note" ? "bg-green-50 border-green-50 border" : "bg-white"} rounded-md shadow-md border-slate-100 max-w-72 border h-fit min-w-72 transition-all duration-300 overflow-hidden`}>
+        <div className={`group relative ${type === "Note" ? "bg-green-50 border-green-50 border" : "bg-white"} 
+        rounded-md shadow-md border-slate-100 max-w-72 border h-fit min-w-72 transition-all duration-300 overflow-hidden`}>
             <div>
                 {type === "Youtube" && (
                     <iframe
@@ -51,6 +84,11 @@ export function Card({ contentId,  link, text,type, timestamp }: CardProps) {
                 {type === "Twitter" && populateTweetCard(link)}
                 {type === "Website" && populateWebsiteCard(link)}
                 {type === "Note" && populateNoteCard(text)}
+                {/* onhover availd this  */}
+                <div className='absolute bottom-2 right-2 bg-gray-300 p-2 rounded-full cursor-pointer hidden group-hover:block transition-opacity duration-200' onClick={()=>handleDelete(contentId)}>
+                    <Trash2 className='h-3 w-3 text-gray-700' />
+                </div>
+
             </div>
         </div>
     );

@@ -6,6 +6,7 @@ import { resetModalState } from "../../redux/Slices/modalSlice";
 import Button from "../button";
 import { BASEURL, privateAxios } from "../../config/axiosConfig";
 import { toast } from "sonner";
+import { toggleState } from "../../redux/Slices/contentSlice";
 
 
 
@@ -34,12 +35,14 @@ export function AddMemoryModal() {
                 link,
                 type
             });
+
             dispatch(resetModalState());
-            // onMemoryAdded();
+            dispatch(toggleState());
+
             if(status.data.flag){
                 toast.success("Memory added successfully!",{
                     action:{
-                        label:'cancel',
+                        label:'close',
                         onClick:()=>{}
                     }
                 });
@@ -57,9 +60,15 @@ export function AddMemoryModal() {
                 type
             });
             dispatch(resetModalState());
-            // onMemoryAdded();
+            dispatch(toggleState());
+
             if(status.data.flag){
-                toast.success("Memory added successfully!");
+                toast.success("Memory added successfully!",{
+                    action:{
+                        label:'close',
+                        onClick:()=>{}
+                    }
+                });
             }else{
                 toast.error("Failed to add memory!");
             }

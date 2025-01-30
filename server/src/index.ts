@@ -125,6 +125,7 @@ app.delete('/api/v1/:contentId', userMiddleware, async (req, res) => {
     console.log("this is the deleted content: ", deletedContent);
 
     res.status(200).json({
+        valid:true,
         message: "delete sucessfull"
     })
 });
