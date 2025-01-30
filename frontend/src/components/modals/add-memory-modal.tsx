@@ -23,7 +23,7 @@ export function AddMemoryModal() {
             
             if (link.includes("youtube")) {
                 type = "Youtube";
-            } else if (link.includes("x.com")) {
+            } else if (link.includes("x.com") || link.split(".")[0].includes("twitter")) {
                 type = "Twitter";
             } else {
                 type = "Website";
