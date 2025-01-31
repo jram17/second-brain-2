@@ -10,6 +10,9 @@ import cookieParser = require("cookie-parser");
 import { connectDB } from './config/configDB';
 import { JWT_ACCESS_PASSWORD, JWT_REFRESH_PASSWORD } from './config/configJWT';
 import { random } from './lib/utils';
+import mql,{ HTTPResponseRaw } from '@microlink/mql';
+
+
 const port = 3000;
 const app = express();
 app.use(express.json());
@@ -98,6 +101,30 @@ app.get('/api/v1/content', userMiddleware, async (req, res) => {
     })
 })
 
+async function fetchMetadata(url: string) {
+    try {
+        const response: HTTPResponseRaw = await mql(url);
+        console.log(response); 
+        // @ts-ignore
+        const { data } = response;  
+        return data; 
+    } catch (error) {
+        console.error('Error fetching metadata:', error);
+        throw error; 
+    }
+}
+
+app.get('/api/v1/scrape', async (req, res) => {
+    const link = 'https://www.youtube.com/watch?v=I0ZIrzoI61g'; 
+    try {
+        const metadata = await fetchMetadata(link);
+        res.json(metadata);  
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch metadata' });
+    }
+});
+
+
 app.post('/api/v1/content', userMiddleware, async (req, res) => {
     // const title = req.body.title;
     const link = req.body.link;
@@ -129,6 +156,8 @@ app.delete('/api/v1/:contentId', userMiddleware, async (req, res) => {
         message: "delete sucessfull"
     })
 });
+
+
 
 app.post("/api/v1/brain/share", userMiddleware, async (req, res) => {
     const share = req.body.share;
