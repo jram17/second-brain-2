@@ -38,12 +38,26 @@ import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 import { AddMemoryModal } from "../modals/add-memory-modal";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
+
+export interface ScrappedProps {
+    author?: string;
+    contentId?: string;
+    description?: string;
+    imageUrl?: string;
+    logoUrl?: string;
+    originUrl?: string;
+    publisher?: string;
+    title?: string;
+    url?: string;
+    _id?: string;
+}
 interface ContentProps {
     _id: string;
     type: string;
     link?: string;
     text?: string;
     tags?: string[];
+    scrapped?: ScrappedProps;
     userId: string;
     timestamp: Date;
 
@@ -51,13 +65,14 @@ interface ContentProps {
 
 export function ContentDiv() {
     const [content, setContent] = useState<ContentProps[]>([]);
-    const contentChange= useSelector((state:RootState)=>state.content.value);
+    const contentChange = useSelector((state: RootState) => state.content.value);
     const dispatch = useDispatch();
     const axiosPrivate = useAxiosPrivate();
     async function fetchContent() {
         try {
             console.log("Fetching content")
             const content = await axiosPrivate.get(`${BASEURL}/api/v1/content`);
+            console.log(content.data.content);
             setContent(content.data.content);
         } catch (error) {
             console.log(error);
@@ -70,26 +85,27 @@ export function ContentDiv() {
 
 
     function populate() {
-        return content.map(({ _id, type, link, text, timestamp }) => <Card
+        return content.map(({ _id, type, link, text, timestamp, scrapped }) => <Card
             key={_id}
             contentId={_id}
             type={type}
             link={link}
+            scrapped={scrapped}
             text={text}
             timestamp={timestamp}
         />)
     }
     return (
-        
+
         <>
-  
-        <Masonry
-            
-            columns={{ xs: 1, sm: 2, md: 3, lg: 4}} 
-            spacing={3} 
-        >
-            {populate()}
-        </Masonry>
+
+            <Masonry className="flex"
+
+                columns={{ xs: 1, sm: 2, md: 3, lg: 4 }}
+                spacing={3}
+            >
+                {populate()}
+            </Masonry>
         </>
     );
 }

@@ -15,9 +15,10 @@ export function AddMemoryModal() {
     const [activeTab, setActiveTab] = useState("Website");
     const linkRef = useRef<HTMLInputElement>();
     const noteRef =useRef<HTMLInputElement>();
+
     const handleMemory = async () => {
         const link = linkRef.current?.value;
-
+        const toastId = toast.loading("Adding to memory...");
         if (link) {
             let type = "";
             
@@ -41,6 +42,7 @@ export function AddMemoryModal() {
 
             if(status.data.flag){
                 toast.success("Memory added successfully!",{
+                    id: toastId,
                     action:{
                         label:'close',
                         onClick:()=>{}
@@ -64,6 +66,7 @@ export function AddMemoryModal() {
 
             if(status.data.flag){
                 toast.success("Memory added successfully!",{
+                    id: toastId,
                     action:{
                         label:'close',
                         onClick:()=>{}

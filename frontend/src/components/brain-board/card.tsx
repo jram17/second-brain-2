@@ -5,11 +5,13 @@ import useAxiosPrivate from '../../hooks/useAxiosPrivate';
 import { BASEURL } from '../../config/axiosConfig';
 import { toast } from 'sonner';
 import { toggleState } from '../../redux/Slices/contentSlice';
+import { ScrappedProps } from './content';
 
 interface CardProps {
     contentId: string;
     text: string;
     link: string;
+    scrapped?: ScrappedProps;
     type: string;
     timestamp?: Date;
 }
@@ -19,7 +21,7 @@ interface CardProps {
 
 
 
-export function Card({ contentId, link, text, type, timestamp }: CardProps) {
+export function Card({ contentId, link, text, type, scrapped, timestamp }: CardProps) {
     const dispatch = useDispatch();
     const axiosPrivate = useAxiosPrivate();
 
@@ -29,14 +31,34 @@ export function Card({ contentId, link, text, type, timestamp }: CardProps) {
         const tweetId: string = link.split('/')[5];
         return (
             <div className='light dark:dark react-tweet-theme' >
-                <Tweet id={tweetId} classname="m-0 "/>
+                <Tweet id={tweetId} />
             </div>
         );
     }
 
-    function populateWebsiteCard(link: string) {
-        return <div className='px-6 py-10 font-normal whitespace-normal break-words overflow-auto'>{link}</div>
+    function populateWebsiteCard(scrapped: ScrappedProps | undefined) {
+        if (!scrapped) return null; // ✅ Fix: Prevent rendering if scrapped is undefined
+        return (
+            <div className='flex flex-col gap-6 group bg-gray-200 pb-4'>
+                <div className='h-28 w-full object-cover rounded-t-2xl shadow-inner'>
+                <img 
+                    src={scrapped.logoUrl} 
+                    className="h-28 w-full object-cover rounded-t-2xl shadow-inner"
+                    alt="Website Logo"
+                />
+                </div>
+                <div className='px-4 flex flex-col gap-2'>
+                    <h1 className='text-xl font-semibold'>{scrapped.title || "Untitled"}</h1>
+                    <div className='flex justify-between items-center mt-2'>
+                        <a href={scrapped.url} target="_blank" rel="noopener noreferrer">
+                            {scrapped?.originUrl ? scrapped.originUrl.split('/')[2] : "Unknown Source"}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        );
     }
+
     function populateNoteCard(text: string) {
         return <div className='px-6 py-10 font-normal whitespace-normal break-words overflow-auto'>{text}</div>
     }
@@ -86,9 +108,9 @@ export function Card({ contentId, link, text, type, timestamp }: CardProps) {
                 )}
                 {type === "Website" && (
                     <div className='flex items-center gap-1'>
-                    <Globe className='h-3 w-3' />
-                    <div className='text-xs '>WebPage</div>
-                </div>
+                        <Globe className='h-3 w-3' />
+                        <div className='text-xs '>Page</div>
+                    </div>
                 )}
             </div>
         );
@@ -112,7 +134,7 @@ export function Card({ contentId, link, text, type, timestamp }: CardProps) {
                 )}
 
                 {type === "Twitter" && populateTweetCard(link)}
-                {type === "Website" && populateWebsiteCard(link)}
+                {type === "Website" && populateWebsiteCard(scrapped)}
                 {type === "Note" && populateNoteCard(text)}
                 {/* onhover availd this  */}
                 <div className='absolute bottom-2 right-2 bg-gray-300 p-2 rounded-full cursor-pointer hidden group-hover:block transition-opacity duration-200' onClick={() => handleDelete(contentId)}>

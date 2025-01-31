@@ -10,7 +10,7 @@ import cookieParser = require("cookie-parser");
 import { connectDB } from './config/configDB';
 import { JWT_ACCESS_PASSWORD, JWT_REFRESH_PASSWORD } from './config/configJWT';
 import { random } from './lib/utils';
-import mql,{ HTTPResponseRaw } from '@microlink/mql';
+import mql, { HTTPResponseRaw } from '@microlink/mql';
 import { Scrapped } from './model/scrapped-content-schema';
 
 
@@ -96,7 +96,12 @@ app.get('/api/v1/content', userMiddleware, async (req, res) => {
     const userId = req.userId;
     const content = await Content.find({
         userId: userId
-    }).populate("userId", "username");
+    }).populate("userId", "username")
+        .populate({
+            path: "scrapped", 
+            model: "Scrapped",
+            select: "author title publisher imageUrl originUrl url description logoUrl"
+        });
     res.status(200).json({
         content
     })
@@ -105,29 +110,29 @@ app.get('/api/v1/content', userMiddleware, async (req, res) => {
 async function fetchMetadata(url: string) {
     try {
         const response: HTTPResponseRaw = await mql(url);
-        console.log(response); 
+        console.log(response);
         // @ts-ignore
-        const { data } = response;  
-        return data; 
+        const { data } = response;
+        return data;
     } catch (error) {
         console.error('Error fetching metadata:', error);
-        throw error; 
+        throw error;
     }
 }
 function getMainUrl(fullUrl) {
     try {
         const url = new URL(fullUrl);
-        return url.origin; 
+        return url.origin;
     } catch (error) {
         console.error("Invalid URL:", error);
         return null;
     }
 }
 app.get('/api/v1/scrape', async (req, res) => {
-    const link = 'https://www.youtube.com/watch?v=I0ZIrzoI61g'; 
+    const link = 'https://www.youtube.com/watch?v=I0ZIrzoI61g';
     try {
         const metadata = await fetchMetadata(link);
-        res.json(metadata);  
+        res.json(metadata);
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch metadata' });
     }
@@ -147,22 +152,24 @@ app.post('/api/v1/content', userMiddleware, async (req, res) => {
             userId: req.userId,
             tags: []
         });
-        const contentId = newContent._id;
-        const metadata = await fetchMetadata(link);
-        const baseUrl = getMainUrl(link);
+        if (link) {
+            const contentId = newContent._id;
+            const metadata = await fetchMetadata(link);
+            const baseUrl = getMainUrl(link);
 
-        await Scrapped.create({
-            contentId,  
-            author: metadata.author,
-            title: metadata.title,
-            publisher: metadata.publisher,
-            imageUrl: metadata.image.url,
-            originUrl: baseUrl,
-            url: link,
-            description: metadata.description,
-            logoUrl: metadata.logo.url,
-        });
 
+            await Scrapped.create({
+                contentId,
+                author: metadata.author,
+                title: metadata.title,
+                publisher: metadata.publisher,
+                imageUrl: metadata.image.url,
+                originUrl: baseUrl,
+                url: link,
+                description: metadata.description,
+                logoUrl: metadata.logo.url,
+            });
+        }
         res.json({
             flag: true,
             message: "Content added successfully",
@@ -180,7 +187,7 @@ app.delete('/api/v1/:contentId', userMiddleware, async (req, res) => {
     console.log("this is the deleted content: ", deletedContent);
 
     res.status(200).json({
-        valid:true,
+        valid: true,
         message: "delete sucessfull"
     })
 });
