@@ -9,9 +9,14 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import cookieParser = require("cookie-parser");
 import { connectDB } from './config/configDB';
 import { JWT_ACCESS_PASSWORD, JWT_REFRESH_PASSWORD } from './config/configJWT';
-import { random } from './lib/utils';
-import mql, { HTTPResponseRaw } from '@microlink/mql';
+import { fetchMetadata, getMainUrl, random } from './lib/utils';
+// import mql, { HTTPResponseRaw } from '@microlink/mql';
 import { Scrapped } from './model/scrapped-content-schema';
+
+import { OpenAI } from "openai";
+
+import { OPENAI_API_KEY } from './config/openAi';
+import { findBestMatch, generateSummary } from './ai-search/ai-search';
 
 
 const port = 3000;
@@ -24,6 +29,12 @@ app.use(cors({
     exposedHeaders: ['Authorization']
 }));
 app.use(cookieParser());
+
+
+const openai = new OpenAI({
+    apiKey: OPENAI_API_KEY,
+});
+
 
 app.post('/api/v1/signup', async (req, res) => {
     const username = req.body.username;
@@ -107,36 +118,6 @@ app.get('/api/v1/content', userMiddleware, async (req, res) => {
     })
 })
 
-async function fetchMetadata(url: string) {
-    try {
-        const response: HTTPResponseRaw = await mql(url);
-        console.log(response);
-        // @ts-ignore
-        const { data } = response;
-        return data;
-    } catch (error) {
-        console.error('Error fetching metadata:', error);
-        throw error;
-    }
-}
-function getMainUrl(fullUrl) {
-    try {
-        const url = new URL(fullUrl);
-        return url.origin;
-    } catch (error) {
-        console.error("Invalid URL:", error);
-        return null;
-    }
-}
-app.get('/api/v1/scrape', async (req, res) => {
-    const link = 'https://www.youtube.com/watch?v=I0ZIrzoI61g';
-    try {
-        const metadata = await fetchMetadata(link);
-        res.json(metadata);
-    } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch metadata' });
-    }
-});
 
 
 app.post('/api/v1/content', userMiddleware, async (req, res) => {
@@ -191,6 +172,69 @@ app.delete('/api/v1/:contentId', userMiddleware, async (req, res) => {
         message: "delete sucessfull"
     })
 });
+
+
+// space for ai search
+app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
+    try {
+        const query = req.body.query;
+        if (!query) {
+            res.status(400).json({ message: "Query is required" });
+            return;
+        }
+
+        const contentList = await Content.find({ userId: req.userId }).populate({
+            path: "scrapped",
+            model: "Scrapped",
+            select: "title description url author publisher imageUrl",
+        });
+
+        if (contentList.length === 0) {
+            res.status(404).json({ message: "No content found" });
+            return;
+        }
+        // @ts-ignore
+        const descriptions = contentList.map((item) => item.scrapped?.description || "");
+        const bestMatchIndex = findBestMatch(query, descriptions);
+
+        if (bestMatchIndex === -1) {
+            res.status(404).json({ message: "No relevant content found" });
+            return;
+        }
+        
+        const bestMatch = contentList[bestMatchIndex];
+        // @ts-ignore
+        const summary = await generateSummary(bestMatch.scrapped?.description || "");
+
+        res.json({
+            // @ts-ignore
+            title: bestMatch.scrapped?.title,// @ts-ignore
+            url: bestMatch.scrapped?.url,// @ts-ignore
+            author: bestMatch.scrapped?.author,// @ts-ignore
+            publisher: bestMatch.scrapped?.publisher,// @ts-ignore
+            imageUrl: bestMatch.scrapped?.imageUrl,
+            summary: summary,
+        });
+
+    } catch (error) {
+        console.error("AI Search Error:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

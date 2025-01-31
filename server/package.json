@@ -28,6 +28,8 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
+    "natural": "^8.0.1",
+    "openai": "^4.81.0",
     "server": "file:"
   }
 }

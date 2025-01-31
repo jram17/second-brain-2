@@ -15,7 +15,7 @@ const useRefreshToken = () => {
             return response.data.accessToken;
         } catch (error) {
             console.error("Error refreshing token:", error);
-                navigate("/sign-in", { replace: true });
+                // navigate("/sign-in", { replace: true });
             throw new Error("Unable to refresh token");
         
         }

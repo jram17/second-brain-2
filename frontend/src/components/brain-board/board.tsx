@@ -3,6 +3,7 @@ import { Content } from "./content";
 import { Menu } from "./menu";
 import { useSelector } from 'react-redux'
 import type { RootState } from "../../redux/store";
+import { AiSearch } from "../ai-query-section";
 
 export function Board(){
 
@@ -11,6 +12,7 @@ export function Board(){
     return (
         <div className="py-24 pl-16 gap-2 max-w-full overflow-x-hidden">
            {isModal && <AddMemoryModal />} 
+           <AiSearch/>
             <Menu/>
             <Content/>
         </div>
