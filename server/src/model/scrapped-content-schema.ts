@@ -6,12 +6,14 @@ const ScrappedSchema = new Schema({
         ref: 'Content',
         required: true
     },
-    author:{type:String},
-    title:{type:String},
-    imageUrl:{type:String},
-    originUrl:{type:String},
-    url:{type:String},
-    description:{type:String},
-    logoUrl:{type:String},
+
+    author: { type: String },
+    title: { type: String },
+    publisher: { type: String },
+    imageUrl: { type: String },
+    originUrl: { type: String },
+    url: { type: String },
+    description: { type: String },
+    logoUrl: { type: String },
 });
 export const Scrapped = model("Scrapped", ScrappedSchema);

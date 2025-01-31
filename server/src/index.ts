@@ -11,6 +11,7 @@ import { connectDB } from './config/configDB';
 import { JWT_ACCESS_PASSWORD, JWT_REFRESH_PASSWORD } from './config/configJWT';
 import { random } from './lib/utils';
 import mql,{ HTTPResponseRaw } from '@microlink/mql';
+import { Scrapped } from './model/scrapped-content-schema';
 
 
 const port = 3000;
@@ -113,7 +114,15 @@ async function fetchMetadata(url: string) {
         throw error; 
     }
 }
-
+function getMainUrl(fullUrl) {
+    try {
+        const url = new URL(fullUrl);
+        return url.origin; 
+    } catch (error) {
+        console.error("Invalid URL:", error);
+        return null;
+    }
+}
 app.get('/api/v1/scrape', async (req, res) => {
     const link = 'https://www.youtube.com/watch?v=I0ZIrzoI61g'; 
     try {
@@ -130,19 +139,38 @@ app.post('/api/v1/content', userMiddleware, async (req, res) => {
     const link = req.body.link;
     const type = req.body.type;
     const text = req.body.text;
-    await Content.create({
-        link,
-        type,
-        // title,
-        text,
-        userId: req.userId,
-        tags: []
-    })
+    try {
+        const newContent = await Content.create({
+            link,
+            type,
+            text,
+            userId: req.userId,
+            tags: []
+        });
+        const contentId = newContent._id;
+        const metadata = await fetchMetadata(link);
+        const baseUrl = getMainUrl(link);
 
-    res.json({
-        flag:true,
-        message: "Content added successfully "
-    })
+        await Scrapped.create({
+            contentId,  
+            author: metadata.author,
+            title: metadata.title,
+            publisher: metadata.publisher,
+            imageUrl: metadata.image.url,
+            originUrl: baseUrl,
+            url: link,
+            description: metadata.description,
+            logoUrl: metadata.logo.url,
+        });
+
+        res.json({
+            flag: true,
+            message: "Content added successfully",
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Failed to process content' });
+    }
 });
 
 app.delete('/api/v1/:contentId', userMiddleware, async (req, res) => {
