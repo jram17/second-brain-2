@@ -6,7 +6,8 @@ import { useDispatch } from "react-redux";
 export function Header() {
     const dispatch = useDispatch();
     return (
-        <div className=" fixed top-0 left-0 z-50 bg-white flex justify-between  py-4 px-4  w-full  backdrop-blur-md border-b border-gray-300 shadow-md">
+        <div className=" fixed top-0 left-0 z-50 bg-white flex justify-between  py-4 px-4  w-full backdrop-blur-md border-b
+         border-gray-300 shadow-md">
             <div className="hover:text-gray-600 p-2">
                 <Brain className="h-6 w-6 " />
             </div>

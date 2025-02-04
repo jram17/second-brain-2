@@ -16,6 +16,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@huggingface/inference": "^3.1.5",
     "@microlink/mql": "^0.13.14",
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
@@ -26,6 +27,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "groq-sdk": "^0.14.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.5",
     "natural": "^8.0.1",

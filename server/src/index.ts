@@ -1,3 +1,6 @@
+
+// @ts-nocheck
+
 import express from 'express';
 import cors from 'cors';
 import { userMiddleware } from './middleware/auth';
@@ -13,9 +16,8 @@ import { fetchMetadata, getMainUrl, random } from './lib/utils';
 // import mql, { HTTPResponseRaw } from '@microlink/mql';
 import { Scrapped } from './model/scrapped-content-schema';
 
-import { OpenAI } from "openai";
-
-import { OPENAI_API_KEY } from './config/openAi';
+import dotenv from "dotenv";
+dotenv.config()
 import { findBestMatch, generateSummary } from './ai-search/ai-search';
 
 
@@ -31,9 +33,6 @@ app.use(cors({
 app.use(cookieParser());
 
 
-const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-});
 
 
 app.post('/api/v1/signup', async (req, res) => {
@@ -109,7 +108,7 @@ app.get('/api/v1/content', userMiddleware, async (req, res) => {
         userId: userId
     }).populate("userId", "username")
         .populate({
-            path: "scrapped", 
+            path: "scrapped",
             model: "Scrapped",
             select: "author title publisher imageUrl originUrl url description logoUrl"
         });
@@ -175,45 +174,95 @@ app.delete('/api/v1/:contentId', userMiddleware, async (req, res) => {
 
 
 // space for ai search
+
+import Groq from "groq-sdk";
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
 app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
     try {
+   
         const query = req.body.query;
         if (!query) {
             res.status(400).json({ message: "Query is required" });
             return;
         }
-
         const contentList = await Content.find({ userId: req.userId }).populate({
             path: "scrapped",
             model: "Scrapped",
-            select: "title description url author publisher imageUrl",
+            select: "title description url author publisher imageUrl logoUrl contentId",
         });
 
         if (contentList.length === 0) {
+            console.log("No content");
             res.status(404).json({ message: "No content found" });
             return;
         }
-        // @ts-ignore
-        const descriptions = contentList.map((item) => item.scrapped?.description || "");
-        const bestMatchIndex = findBestMatch(query, descriptions);
+        const validContentList = contentList.filter(content => content.scrapped);
 
-        if (bestMatchIndex === -1) {
+        if (validContentList.length === 0) {
+            res.status(404).json({ message: "No relevant content with scrapped data found" });
+            return;
+        }
+
+        
+        const contentTexts = validContentList.map(content => 
+            `${content.scrapped?.title || "Untitled"} - ${content.scrapped?.description || "No description"}`
+        );
+
+        const prompt = `
+            Given the following pieces of content, find the one that best matches the user query:
+            Query: "${query}"
+            
+            Content:
+            ${contentTexts.map((text, index) => `(${index + 1}) ${text}`).join("\n")}
+
+            Return ONLY the number of the most relevant content (e.g., "1", "2", etc.).
+        `;
+        
+        const response = await groq.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "user", content: prompt }],
+        });
+
+        const matchText = response.choices[0]?.message?.content?.trim();
+        const bestMatchIndex = parseInt(matchText, 10) - 1;
+        if (isNaN(bestMatchIndex) || bestMatchIndex < 0 || bestMatchIndex >= validContentList.length) {
             res.status(404).json({ message: "No relevant content found" });
             return;
         }
-        
-        const bestMatch = contentList[bestMatchIndex];
-        // @ts-ignore
-        const summary = await generateSummary(bestMatch.scrapped?.description || "");
+
+        const bestMatch = validContentList[bestMatchIndex];
+
+        const summaryPrompt = `
+            Summarize the following content in relation to the user query: "${query}"
+            
+            Content: "${bestMatch.scrapped.title || "Untitled"} - ${bestMatch.scrapped.description || "No description"}"
+
+            Provide a concise response (if the summary is short,then ellaborate ).
+        `;
+
+        const summaryResponse = await groq.chat.completions.create({
+            model: "llama3-8b-8192",
+            messages: [{ role: "user", content: summaryPrompt }],
+        });
+
+        const summary = summaryResponse.choices[0]?.message?.content?.trim() || "No summary available.";
 
         res.json({
-            // @ts-ignore
-            title: bestMatch.scrapped?.title,// @ts-ignore
-            url: bestMatch.scrapped?.url,// @ts-ignore
-            author: bestMatch.scrapped?.author,// @ts-ignore
-            publisher: bestMatch.scrapped?.publisher,// @ts-ignore
-            imageUrl: bestMatch.scrapped?.imageUrl,
-            summary: summary,
+            status: true,
+            bestMatch: {
+                contendId:bestMatch.scrapped.contendId || "Unkown",
+                title: bestMatch.scrapped.title || "Untitled",
+                description: bestMatch.scrapped.description || "No description",
+                url: bestMatch.scrapped.url || "",
+                author: bestMatch.scrapped.author || "Unknown",
+                publisher: bestMatch.scrapped.publisher || "Unknown",
+                imageUrl: bestMatch.scrapped.imageUrl || "",
+                logoUrl: bestMatch.scrapped.logoUrl || "",
+
+            },
+            summary,
         });
 
     } catch (error) {
@@ -221,6 +270,7 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
 
 
 

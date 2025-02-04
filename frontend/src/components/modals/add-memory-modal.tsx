@@ -7,6 +7,7 @@ import Button from "../button";
 import { BASEURL, privateAxios } from "../../config/axiosConfig";
 import { toast } from "sonner";
 import { toggleState } from "../../redux/Slices/contentSlice";
+import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 
 
 
@@ -15,7 +16,7 @@ export function AddMemoryModal() {
     const [activeTab, setActiveTab] = useState("Website");
     const linkRef = useRef<HTMLInputElement>();
     const noteRef =useRef<HTMLInputElement>();
-
+    const axiosPrivate=useAxiosPrivate();
     const handleMemory = async () => {
         const link = linkRef.current?.value;
         const toastId = toast.loading("Adding to memory...");
@@ -32,7 +33,7 @@ export function AddMemoryModal() {
 
             console.log("hit");
 
-            const status=await privateAxios.post(`${BASEURL}/api/v1/content`, {
+            const status=await axiosPrivate.post(`${BASEURL}/api/v1/content`, {
                 link,
                 type
             });

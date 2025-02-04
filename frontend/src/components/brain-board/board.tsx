@@ -10,7 +10,7 @@ export function Board(){
     const isModal = useSelector((state: RootState) => state.modal.isModal);
     // const isModal=true;
     return (
-        <div className="py-24 pl-16 gap-2 max-w-full overflow-x-hidden">
+        <div className="py-24 pl-16 gap-2 overflow-x-hidden  max-w-full">
            {isModal && <AddMemoryModal />} 
            <AiSearch/>
             <Menu/>

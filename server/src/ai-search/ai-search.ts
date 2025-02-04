@@ -1,9 +1,25 @@
-import { OpenAI } from "openai";
+
 import natural from "natural";
-import { OPENAI_API_KEY } from '../config/openAi';
-const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-});
+
+
+import { HfInference } from "@huggingface/inference";
+
+const hf = new HfInference("your_huggingface_api_key"); 
+
+export async function generateSummary(text: string): Promise<string> {
+    try {
+        const response = await hf.summarization({
+            model: "facebook/bart-large-cnn",
+            inputs: text,
+            parameters: { max_length: 100, min_length: 30 },
+        });
+
+        return response.summary_text || "No summary available.";
+    } catch (error) {
+        console.error("Hugging Face Error:", error);
+        return "Could not generate summary.";
+    }
+}
 
 
 export function findBestMatch(query: string, descriptions: string[]): number {
@@ -16,7 +32,7 @@ export function findBestMatch(query: string, descriptions: string[]): number {
     descriptions.forEach((description, index) => {
         const descriptionTokens = tokenizer.tokenize(description.toLowerCase());
         const commonTokens = descriptionTokens.filter((token) => queryTokens.includes(token));
-        const score = commonTokens.length / queryTokens.length; // Similarity score
+        const score = commonTokens.length / queryTokens.length;
 
         if (score > highestScore) {
             highestScore = score;
@@ -26,19 +42,4 @@ export function findBestMatch(query: string, descriptions: string[]): number {
 
     return bestIndex;
 };
-
-export async function generateSummary(text: string): Promise<string> {
-    try {
-        const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: `Summarize this content:\n\n${text}` }],
-            max_tokens: 100,
-        });
-
-        return response.choices[0]?.message?.content || "No summary available.";
-    } catch (error) {
-        console.error("OpenAI Error:", error);
-        return "Could not generate summary.";
-    }
-}
 
