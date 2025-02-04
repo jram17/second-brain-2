@@ -20,16 +20,19 @@ export function AiSearch() {
 
     try {
       const response = await axiosPrivate.post(`${BASEURL}/api/v1/query`, { query });
-
+      console.log(response.data.bestmatch);
       if (response.data.status) {
+       
         setResults(response.data.bestmatch);
         setSummary(response.data.summary);
+       
         toast.success("Search results found", {
           action: {
             label: "Close",
             onClick: () => { }
           }
         });
+        
       }
     } catch (error) {
       toast.error("Error fetching search results");
@@ -37,13 +40,6 @@ export function AiSearch() {
     }
   };
 
-  const getType=()=>{
-    if( !results?.publiser.toLowerCase().conatins("youtube || x || twitter")){
-      return "Website";
-    }else{
-      return results.publisher
-    }
-  }
 
   return (
     <div className="border border-gray-200 px-48 mr-20 flex  justify-center gap-2">
@@ -82,16 +78,11 @@ export function AiSearch() {
         {/* Results Section */}
         <div className="my-6">
           <div className="flex flex-col md:flex-row md:gap-6">
-            <div className=" border border-zinc-200 px-8 py-2 rounded-3xl leading-relaxed">{summary}</div></div>
+           {summary &&  <div className=" border border-zinc-200 px-8 py-2 rounded-3xl leading-relaxed">{summary}</div>}
+          </div>
         </div>
       </div>
-      (results && <div><Card contentId={"unknown"}
-        type={ getType}
-        link={results.}
-        scrapped={scrapped}
-        text={text}
-        timestamp={timestamp} />
-      </div>)
+      {results }
     </div>
   );
 }

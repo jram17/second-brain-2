@@ -1,5 +1,5 @@
 
-// @ts-nocheck
+
 
 import express from 'express';
 import cors from 'cors';
@@ -187,35 +187,34 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
             res.status(400).json({ message: "Query is required" });
             return;
         }
-        const contentList = await Content.find({ userId: req.userId }).populate({
-            path: "scrapped",
-            model: "Scrapped",
-            select: "title description url author publisher imageUrl logoUrl contentId",
-        });
+        const contentList = await Content.find({ userId: req.userId });
+
 
         if (contentList.length === 0) {
             console.log("No content");
             res.status(404).json({ message: "No content found" });
             return;
         }
-        const validContentList = contentList.filter(content => content.scrapped);
-
-        if (validContentList.length === 0) {
-            res.status(404).json({ message: "No relevant content with scrapped data found" });
-            return;
-        }
-
+        const contentData = await Promise.all(
+            contentList.map(async (content) => {
+                const scrapped = await Scrapped.findOne({ contentId: content._id });
         
-        const contentTexts = validContentList.map(content => 
-            `${content.scrapped?.title || "Untitled"} - ${content.scrapped?.description || "No description"}`
+                return {
+                    query: `${content.text} - ${scrapped ? scrapped.description : "No description"}`,
+                    content: scrapped || content
+                };
+            })
         );
-
+        
+        const queries = contentData.map(item => item.query);
+        const contents = contentData.map(item => item.content);
+         
         const prompt = `
             Given the following pieces of content, find the one that best matches the user query:
             Query: "${query}"
             
             Content:
-            ${contentTexts.map((text, index) => `(${index + 1}) ${text}`).join("\n")}
+            ${queries.map((text, index) => `(${index + 1}) ${text}`).join("\n")}
 
             Return ONLY the number of the most relevant content (e.g., "1", "2", etc.).
         `;
@@ -227,17 +226,18 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
 
         const matchText = response.choices[0]?.message?.content?.trim();
         const bestMatchIndex = parseInt(matchText, 10) - 1;
-        if (isNaN(bestMatchIndex) || bestMatchIndex < 0 || bestMatchIndex >= validContentList.length) {
+        if (isNaN(bestMatchIndex) || bestMatchIndex < 0 || bestMatchIndex >= contentData.length) {
             res.status(404).json({ message: "No relevant content found" });
             return;
         }
 
-        const bestMatch = validContentList[bestMatchIndex];
+        const bestMatch = queries[bestMatchIndex];
+        const [title,description] = bestMatch.split('-');
 
         const summaryPrompt = `
             Summarize the following content in relation to the user query: "${query}"
             
-            Content: "${bestMatch.scrapped.title || "Untitled"} - ${bestMatch.scrapped.description || "No description"}"
+            Content: "${title || "Untitled"} - ${description || "No description"}"
 
             Provide a concise response (if the summary is short,then ellaborate ).
         `;
@@ -251,17 +251,7 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
 
         res.json({
             status: true,
-            bestMatch: {
-                contendId:bestMatch.scrapped.contendId || "Unkown",
-                title: bestMatch.scrapped.title || "Untitled",
-                description: bestMatch.scrapped.description || "No description",
-                url: bestMatch.scrapped.url || "",
-                author: bestMatch.scrapped.author || "Unknown",
-                publisher: bestMatch.scrapped.publisher || "Unknown",
-                imageUrl: bestMatch.scrapped.imageUrl || "",
-                logoUrl: bestMatch.scrapped.logoUrl || "",
-
-            },
+            bestMatch:contents[bestMatchIndex],
             summary,
         });
 
@@ -270,20 +260,6 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
