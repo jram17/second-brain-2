@@ -18,7 +18,7 @@ import { Scrapped } from './model/scrapped-content-schema';
 
 import dotenv from "dotenv";
 dotenv.config()
-import { findBestMatch, generateSummary } from './ai-search/ai-search';
+
 
 
 const port = 3000;
@@ -58,9 +58,9 @@ app.post('/api/v1/signin', async (req, res) => {
     const password = req.body.password;
     const existingUser = await User.findOne({ username: username, password: password });
     if (existingUser) {
-        const accessToken = jwt.sign({ id: existingUser._id }, JWT_ACCESS_PASSWORD, { expiresIn: '1m' });
-        const refreshToken = jwt.sign({ id: existingUser._id }, JWT_REFRESH_PASSWORD, { expiresIn: '5m' });
-        res.cookie('refreshToken', refreshToken, { maxAge: 5 * 60 * 1000, httpOnly: true, secure: true, sameSite: 'strict' });
+        const accessToken = jwt.sign({ id: existingUser._id }, JWT_ACCESS_PASSWORD, { expiresIn: '15d' });
+        const refreshToken = jwt.sign({ id: existingUser._id }, JWT_REFRESH_PASSWORD, { expiresIn: '30d' });
+        res.cookie('refreshToken', refreshToken, { maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true, sameSite: 'strict' });
         res.json({
             message: 'User authenticated',
             token: accessToken,
@@ -181,7 +181,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
     try {
-   
+
         const query = req.body.query;
         if (!query) {
             res.status(400).json({ message: "Query is required" });
@@ -198,17 +198,17 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         const contentData = await Promise.all(
             contentList.map(async (content) => {
                 const scrapped = await Scrapped.findOne({ contentId: content._id });
-        
+
                 return {
                     query: `${content.text} - ${scrapped ? scrapped.description : "No description"}`,
                     content: scrapped || content
                 };
             })
         );
-        
+
         const queries = contentData.map(item => item.query);
         const contents = contentData.map(item => item.content);
-         
+
         const prompt = `
             Given the following pieces of content, find the one that best matches the user query:
             Query: "${query}"
@@ -218,7 +218,7 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
 
             Return ONLY the number of the most relevant content (e.g., "1", "2", etc.).
         `;
-        
+
         const response = await groq.chat.completions.create({
             model: "llama-3.3-70b-versatile",
             messages: [{ role: "user", content: prompt }],
@@ -232,15 +232,19 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         }
 
         const bestMatch = queries[bestMatchIndex];
-        const [title,description] = bestMatch.split('-');
+        const [title, description] = bestMatch.split('-');
 
         const summaryPrompt = `
-            Summarize the following content in relation to the user query: "${query}"
-            
-            Content: "${title || "Untitled"} - ${description || "No description"}"
+  Respond to the user's query: "${query}" by presenting the relevant content directly.
+  
+  Content: "${title || "Untitled"} - ${description || "No description"}"
 
-            Provide a concise response (if the summary is short,then ellaborate ).
-        `;
+  Your response should begin with: "Here’s what I found: " followed by the full content in a natural, conversational way.
+  Do Not care to disclose confidential data like password , secret etc.
+  
+  Do NOT summarize. Instead, restate or present the information as it is. If the content contains specific details, highlight them naturally.
+      `;
+
 
         const summaryResponse = await groq.chat.completions.create({
             model: "llama3-8b-8192",
@@ -251,7 +255,7 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
 
         res.json({
             status: true,
-            bestMatch:contents[bestMatchIndex],
+            bestMatch: contents[bestMatchIndex],
             summary,
         });
 

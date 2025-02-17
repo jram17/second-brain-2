@@ -20,10 +20,10 @@ export function AiSearch() {
 
     try {
       const response = await axiosPrivate.post(`${BASEURL}/api/v1/query`, { query });
-      console.log(response.data.bestmatch);
+      console.log(response.data.bestMatch);
       if (response.data.status) {
        
-        setResults(response.data.bestmatch);
+        setResults(response.data.bestMatch);
         setSummary(response.data.summary);
        
         toast.success("Search results found", {
@@ -43,7 +43,6 @@ export function AiSearch() {
 
   return (
     <div className="border border-gray-200 px-48 mr-20 flex  justify-center gap-2">
-      {/* Greeting */}
       <div>
         <div className="bg-gradient-to-b mt-20 md:mt-0 mb-8 from-neutral-800 via-neutral-600 to-neutral-300 bg-clip-text">
           <h1 className="font-normal md:text-6xl tracking-[-0.03em] text-4xl text-transparent">
@@ -51,7 +50,6 @@ export function AiSearch() {
           </h1>
         </div>
 
-        {/* Search Box */}
         <div className="flex flex-col lg:flex-row lg:gap-8 gap-4 w-full">
           <form
             onSubmit={handleQuery}
@@ -75,14 +73,19 @@ export function AiSearch() {
           </form>
         </div>
 
-        {/* Results Section */}
         <div className="my-6">
           <div className="flex flex-col md:flex-row md:gap-6">
            {summary &&  <div className=" border border-zinc-200 px-8 py-2 rounded-3xl leading-relaxed">{summary}</div>}
           </div>
         </div>
       </div>
-      {results }
+      {results && <Card 
+            contentId={results?._id}
+            type={results?.type}
+            link={results?.link}
+            scrapped={results?.scrapped}
+            text={results?.text}
+            timestamp={results?.timestamp}/>}
     </div>
   );
 }
