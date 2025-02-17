@@ -14,7 +14,7 @@ import {
 } from "../components/ui/alert";
 import { BASEURL } from "../config/axiosConfig";
 export const Signin = () => {
-    const usernameRef = useRef<HTMLInputElement>(null); // Ensure refs are initialized properly
+    const usernameRef = useRef<HTMLInputElement>(null); 
     const passwordRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
 
@@ -31,6 +31,7 @@ export const Signin = () => {
             });
             console.log({"response object :":response.data})
             sessionStorage.setItem("access_token",response.data.token);
+            sessionStorage.setItem("username",String(username))
             
             toast.success(`Welcome back, ${username}!`, {
                 action: {

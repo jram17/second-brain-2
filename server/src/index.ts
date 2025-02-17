@@ -200,7 +200,8 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
                 const scrapped = await Scrapped.findOne({ contentId: content._id });
 
                 return {
-                    query: `${content.text} - ${scrapped ? scrapped.description : "No description"}`,
+                    query: `${content.text} - ${scrapped ? scrapped.description : "No description"}- ${scrapped ? scrapped.title : "No title"}
+                        - ${scrapped ? scrapped.author : "No author"}`,
                     content: scrapped || content
                 };
             })
@@ -232,17 +233,28 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         }
 
         const bestMatch = queries[bestMatchIndex];
-        const [title, description] = bestMatch.split('-');
+        const [title, description, author] = bestMatch.split('-');
 
         const summaryPrompt = `
-  Respond to the user's query: "${query}" by presenting the relevant content directly.
-  
-  Content: "${title || "Untitled"} - ${description || "No description"}"
-
-  Your response should begin with: "Here’s what I found: " followed by the full content in a natural, conversational way.
-  Do Not care to disclose confidential data like password , secret etc.
-  
-  Do NOT summarize. Instead, restate or present the information as it is. If the content contains specific details, highlight them naturally.
+        The user has asked the following query: "${query}".  
+      
+        You have been given the most relevant content. Present it in a clear and conversational manner without summarizing. Ensure that all details are naturally included.  
+      
+        **Content Details:**  
+        - **Title**: ${title?.trim() || "Untitled"}  
+        - **Description**: ${description?.trim() || "No description available"}  
+        - **Author**: ${author?.trim() || "No author specified"}  
+        - **Full Content**: ${contents[bestMatchIndex] ? JSON.stringify(contents[bestMatchIndex]) : "No additional content available"}  
+      
+        **Instructions:**  
+        - Your response must start with: **"Here’s what I found:"**  
+        - Do NOT omit any details from the given content.  
+        - Present the content in a natural way, ensuring all fields are included.  
+        - If any information is missing, acknowledge it appropriately rather than assuming.  
+        - Maintain clarity, but do not modify or summarize the content.  
+        - Do disclose confidential data like passwords or secrets.  
+      
+        Now, generate the response based on the provided details.
       `;
 
 
@@ -329,7 +341,28 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
         content: content
     })
 
-})
+});
+
+app.post('/api/v1/forgot-password', async (req, res) => {
+    const username = req.body.username;
+    const currentPassword = req.body.password;
+    const newPassword = req.body.newPassword;
+
+    const user = await User.findOne({ username });
+    if (user) {
+        if (currentPassword === user.password) {
+            user.password = newPassword;
+            await user.save();
+            res.status(200).json({ status: true, message: "password updated successfully" })
+        } else {
+            res.status(400).json({ status: false, message: "Incorrect current password" })
+            return;
+        }
+    } else {
+        res.status(404).json({ status: false, message: "User not found" })
+        return;
+    }
+});
 
 connectDB();
 app.listen(3000, () => {
