@@ -4,6 +4,7 @@ import Signin from "./pages/signin"
 import Signup from "./pages/signup"
 import Dashboard from "./pages/dashboard"
 import WebLayout from "./layouts/web-layout"
+import { Profile } from "./pages/profile"
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
 
         <Route path="/sign-in" element={<Signin />} />
         <Route path="/sign-up" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
 
       </Routes>
     </BrowserRouter >

@@ -32,10 +32,9 @@ export function AddMemory() {
 
 
 
-// import { getContent } from "../../services/contentService";
 import { BASEURL, privateAxios } from "../../config/axiosConfig";
 import useAxiosPrivate from "../../hooks/useAxiosPrivate";
-import { AddMemoryModal } from "../modals/add-memory-modal";
+
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 
@@ -66,7 +65,7 @@ interface ContentProps {
 export function ContentDiv() {
     const [content, setContent] = useState<ContentProps[]>([]);
     const contentChange = useSelector((state: RootState) => state.content.value);
-    const dispatch = useDispatch();
+    const selectedState = useSelector((state:RootState)=>state.state.value);
     const axiosPrivate = useAxiosPrivate();
     async function fetchContent() {
         try {
@@ -82,10 +81,13 @@ export function ContentDiv() {
     useEffect(() => {
         fetchContent();
     }, [contentChange]);
-
+    const filteredContent = content.filter(({ type }) =>
+        selectedState === "All Memories" || type === selectedState
+    );
 
     function populate() {
-        return content.map(({ _id, type, link, text, timestamp, scrapped }) => <Card
+
+        return filteredContent.map(({ _id, type, link, text, timestamp, scrapped }) => <Card
             key={_id}
             contentId={_id}
             type={type}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import { BASEURL } from "../config/axiosConfig";
-import { Globe, NotebookPen, Search, Trash2 } from "lucide-react";
+import { Globe, LoaderCircle, NotebookPen, Search, Trash2 } from "lucide-react";
 import { Card } from "./brain-board/card";
 import { useDispatch } from "react-redux";
 import { toggleState } from "../redux/Slices/contentSlice";
@@ -27,6 +27,7 @@ export function AiSearch() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState(false);
   const axiosPrivate = useAxiosPrivate();
 
   const handleQuery = async (e: React.FormEvent) => {
@@ -35,6 +36,8 @@ export function AiSearch() {
       toast.error("Please enter a search query");
       return;
     }
+
+    setLoading(true);
 
     try {
       const response = await axiosPrivate.post(`${BASEURL}/api/v1/query`, { query });
@@ -55,6 +58,8 @@ export function AiSearch() {
     } catch (error) {
       toast.error("Error fetching search results");
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
   const [username, setUsername] = useState("");
@@ -69,7 +74,7 @@ export function AiSearch() {
 
 
   return (
-    <div className="border border-gray-200 px-48 mr-20 flex  justify-center gap-2 ">
+    <div className=" px-48 mr-20 flex  justify-center gap-2 ">
       <div>
         <div className="bg-gradient-to-b mt-20 md:mt-0 mb-8 from-neutral-800 via-neutral-600 to-neutral-300 bg-clip-text">
           <h1 className="font-normal md:text-6xl tracking-[-0.03em] text-4xl text-transparent">
@@ -94,7 +99,9 @@ export function AiSearch() {
                 type="submit"
                 className="self-center rounded-full p-3 bg-neutral-800 border disabled:opacity-50 hover:bg-neutral-700 transition-colors"
               >
-                <Search className="text-white" />
+                {loading ? (<div className="animate-spin text-white">
+                  <LoaderCircle />
+                </div>) : (<Search className="text-white" />)}
               </button>
             </div>
           </form>
@@ -102,15 +109,46 @@ export function AiSearch() {
 
         <div className="my-6">
           <div className="flex flex-col md:flex-row md:gap-6">
-            {summary && <div className=" border border-zinc-200 px-8 py-2 rounded-3xl leading-relaxed">{summary}</div>}
+            {loading ? (
+              <div className="flex flex-col   justify-start items-center  text-sm">
+                <div className="flex flex-col gap-2  animate-pulse">
+                  <div className="w-28 bg-gray-200 h-4 rounded-md"></div>
+                  <div className="w-80 bg-gray-200 h-4 rounded-md"></div>
+                  <div className="w-96 bg-gray-200 h-4 rounded-md"></div>
+                  <div className="w-72 bg-gray-200 h-4 rounded-md"></div>
+                  <div className="w-60 bg-gray-200 h-4 rounded-md"></div>
+                </div>
+
+                <div className="flex gap-1 animate-pulse items-center">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                  <span className="pl-2">Searching through your memories...</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                {summary && <div className=" border border-zinc-200 px-8 py-2 rounded-3xl leading-relaxed">
+                  <div className="flex justify-between">
+                    <div className="pb-2 pt-2 text-gray-500 text-sm flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      second brain response</div>
+                    {/* <div >date</div>  the time when the query was fetched */}
+                  </div>
+
+                  {summary}</div>}
+              </>
+            )}
+
           </div>
         </div>
       </div>
-      <div className="ml-2 mt-24">
+      {loading ? (<></>) : (<div className="ml-2 mt-24">
         {results && (
           <CardHere {...results} />
         )}
-      </div>
+      </div>)}
+
 
     </div>
   );

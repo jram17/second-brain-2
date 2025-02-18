@@ -9,8 +9,8 @@ import { ScrappedProps } from './content';
 
 interface CardProps {
     contentId: string;
-    text: string;
-    link: string;
+    text?: string;
+    link?: string;
     scrapped?: ScrappedProps;
     type: string;
     timestamp?: Date;
@@ -124,7 +124,7 @@ export function Card({ contentId, link, text, type, scrapped, timestamp }: CardP
                 {type === "Youtube" && (
                     <iframe
                         className="w-full"
-                        src={link.replace("watch?v=", "embed/")}
+                        src={link?.replace("watch?v=", "embed/")}
                         title="YouTube video player"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -133,9 +133,9 @@ export function Card({ contentId, link, text, type, scrapped, timestamp }: CardP
                     ></iframe>
                 )}
 
-                {type === "Twitter" && populateTweetCard(link)}
+                {type === "Twitter" && populateTweetCard(String(link))}
                 {type === "Website" && populateWebsiteCard(scrapped)}
-                {type === "Note" && populateNoteCard(text)}
+                {type === "Note" && populateNoteCard(String(text))}
                 {/* onhover availd this  */}
                 <div className='absolute bottom-2 right-2 bg-gray-300 p-2 rounded-full cursor-pointer hidden group-hover:block transition-opacity duration-200' onClick={() => handleDelete(contentId)}>
                     <Trash2 className='h-3 w-3 text-gray-700' />
