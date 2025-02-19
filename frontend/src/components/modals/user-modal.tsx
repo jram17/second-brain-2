@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { GitBranch, Github, LogOut, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { resetUserModalState } from "../../redux/Slices/userModalSlice";
+import { avatorColor } from "../header";
 
 export function UserModal() {
     const dispatch = useDispatch();
@@ -26,19 +27,19 @@ export function UserModal() {
         navigate("/profile", { replace: true });
     }
 
-    function randomColor() {
-        let colors=[
-            "#FFD1DC", // Soft Pink
-            "#A7C7E7", // Soft Blue
-            "#C3B1E1", // Soft Purple
-            "#FCEABB", // Soft Yellow
-            "#B5EAD7", // Soft Green
-            "#FFDAC1"  // Soft Peach
-        ]
-        let num= Math.floor(Math.random()*colors.length)
-        return colors[num]
-    }
-    const avatorColor= randomColor();
+    // function randomColor() {
+    //     const colors = [
+    //         "#D72638", // Deep Red
+    //         "#3F88C5", // Strong Blue
+    //         "#2E294E", // Dark Purple
+    //         "#1B998B", // Teal Green
+    //         "#F46036", // Bright Orange
+    //         "#6A0572"  // Rich Violet
+    //     ];
+    //     let num= Math.floor(Math.random()*colors.length)
+    //     return colors[num]
+    // }
+    // const avatorColor= randomColor();
     useEffect(() => {
         const username = sessionStorage.getItem("username");
         setUser(username);  
@@ -62,7 +63,7 @@ export function UserModal() {
                 <div className="  mt-16 w-64 bg-white dark:bg-zinc-800 border dark:border-gray-600 rounded-lg shadow-lg ">
                     <div className="p-4 border-b flex items-center">
                         <div className="mr-3">
-                            <Avatar name={user} size="30" round={true} color={avatorColor} />
+                            <Avatar name={user as string} size="30" round={true} color={avatorColor} />
                         </div>
                         <div className="font-lg">{user}</div>
                     </div>

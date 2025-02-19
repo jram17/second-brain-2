@@ -110,7 +110,7 @@ export function AiSearch() {
         <div className="my-6">
           <div className="flex flex-col md:flex-row md:gap-6">
             {loading ? (
-              <div className="flex flex-col   justify-start items-center  text-sm">
+              <div className="flex flex-col   justify-start items-center  text-sm pl-2">
                 <div className="flex flex-col gap-2  animate-pulse">
                   <div className="w-28 bg-gray-200 h-4 rounded-md"></div>
                   <div className="w-80 bg-gray-200 h-4 rounded-md"></div>
@@ -119,7 +119,7 @@ export function AiSearch() {
                   <div className="w-60 bg-gray-200 h-4 rounded-md"></div>
                 </div>
 
-                <div className="flex gap-1 animate-pulse items-center">
+                <div className="flex gap-1 animate-pulse items-center pt-2 justify-start">
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>

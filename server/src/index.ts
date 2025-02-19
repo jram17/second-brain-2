@@ -249,11 +249,12 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         **Instructions:**  
         - Your response must start with: **"Here’s what I found:"**  
         - Do NOT omit any details from the given content.  
-        - Present the content in a natural way, ensuring all fields are included.  
+        - Present the content in a natural way, ensuring all fields are included. 
+        - Summarize the content if necessary 
         - If any information is missing, acknowledge it appropriately rather than assuming.  
-        - Maintain clarity, but do not modify or summarize the content.  
+        - Maintain clarity
         - Do disclose confidential data like passwords or secrets.  
-      
+        - Do not disclose contents timestamp and Id
         Now, generate the response based on the provided details.
       `;
 
@@ -345,10 +346,11 @@ app.get("/api/v1/brain/:shareLink", async (req, res) => {
 
 app.post('/api/v1/forgot-password', async (req, res) => {
     const username = req.body.username;
-    const currentPassword = req.body.password;
+    const currentPassword = req.body.currentPassword;
     const newPassword = req.body.newPassword;
 
     const user = await User.findOne({ username });
+    console.log(user)
     if (user) {
         if (currentPassword === user.password) {
             user.password = newPassword;

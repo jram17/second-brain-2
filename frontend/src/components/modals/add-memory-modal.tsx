@@ -15,7 +15,7 @@ export function AddMemoryModal() {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState("Website");
     const linkRef = useRef<HTMLInputElement>(null);
-    const noteRef =useRef<HTMLInputElement>(null);
+    const noteRef =useRef<HTMLTextAreaElement>(null);
     const axiosPrivate=useAxiosPrivate();
     const handleMemory = async () => {
         const link = linkRef.current?.value;
