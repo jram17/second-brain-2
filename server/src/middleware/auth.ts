@@ -16,7 +16,7 @@ export const userMiddleware = (req: Request, res: Response, next: NextFunction) 
             res.status(403).json({ valid: false, message: "Invalid token format" });
         }
     } catch (err) {
-        if (err.name === "TokenExpiredError") {
+        if (err  instanceof Error) {
             res.status(401).json({ valid: false, message: "Access token expired" });
         } else {
             res.status(403).json({ valid: false, message: "Token invalid" });

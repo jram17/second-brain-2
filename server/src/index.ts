@@ -92,9 +92,10 @@ app.get('/api/v1/refresh', (req, res) => {
 
         res.status(201).json({ accessToken: accessToken, message: "Access token generated" });
     } catch (error) {
-        if (error.name === "TokenExpiredError") {
+        if(error  instanceof Error){
             res.status(401).json({ valid: false, message: "Refresh token expired" });
-        } else {
+        }
+         else {
             res.status(403).json({ valid: false, message: "Invalid refresh token" });
         }
     }
@@ -226,7 +227,7 @@ app.post("/api/v1/query", userMiddleware, async (req, res): Promise<void> => {
         });
 
         const matchText = response.choices[0]?.message?.content?.trim();
-        const bestMatchIndex = parseInt(matchText, 10) - 1;
+        const bestMatchIndex = parseInt(matchText as string, 10) - 1;
         if (isNaN(bestMatchIndex) || bestMatchIndex < 0 || bestMatchIndex >= contentData.length) {
             res.status(404).json({ message: "No relevant content found" });
             return;

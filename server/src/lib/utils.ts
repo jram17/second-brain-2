@@ -26,7 +26,7 @@ export async function fetchMetadata(url: string) {
         throw error;
     }
 }
-export function getMainUrl(fullUrl) {
+export function getMainUrl(fullUrl:string) {
     try {
         const url = new URL(fullUrl);
         return url.origin;
