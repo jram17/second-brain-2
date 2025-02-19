@@ -1,0 +1,90 @@
+
+import { useNavigate } from "react-router-dom";
+import Avatar from "react-avatar";
+import { useEffect, useState } from "react";
+import { GitBranch, Github, LogOut, User } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { resetUserModalState } from "../../redux/Slices/userModalSlice";
+
+export function UserModal() {
+    const dispatch = useDispatch();
+
+
+
+    const navigate = useNavigate();
+    const [user, setUser] = useState<String | null>('');
+   
+    function handleLogout() {
+        const token = sessionStorage.getItem("access_token");
+        const user = sessionStorage.getItem("username");
+        sessionStorage.removeItem("access_token");
+        sessionStorage.removeItem("username");
+        console.log({ token: token, user: user });
+        navigate("/home", { replace: true });
+    }
+    function handleProfile() {
+        navigate("/profile", { replace: true });
+    }
+
+    function randomColor() {
+        let colors=[
+            "#FFD1DC", // Soft Pink
+            "#A7C7E7", // Soft Blue
+            "#C3B1E1", // Soft Purple
+            "#FCEABB", // Soft Yellow
+            "#B5EAD7", // Soft Green
+            "#FFDAC1"  // Soft Peach
+        ]
+        let num= Math.floor(Math.random()*colors.length)
+        return colors[num]
+    }
+    const avatorColor= randomColor();
+    useEffect(() => {
+        const username = sessionStorage.getItem("username");
+        setUser(username);  
+        
+    }, [])
+    return (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-end  pt-24 pr-6 z-50"
+            onClick={() => dispatch(resetUserModalState())}>
+
+
+
+            {/* <div className="bg-white p-6 rounded-lg shadow-lg w-auto" onClick={(e) => e.stopPropagation()}>
+                <div>
+                    
+
+                </div>
+            </div> */}
+
+            <div className="absolute  top-4 right-4 max-w-md  overflow-auto max-h-[90vh]"
+                onClick={(e) => e.stopPropagation()}>
+                <div className="  mt-16 w-64 bg-white dark:bg-zinc-800 border dark:border-gray-600 rounded-lg shadow-lg ">
+                    <div className="p-4 border-b flex items-center">
+                        <div className="mr-3">
+                            <Avatar name={user} size="30" round={true} color={avatorColor} />
+                        </div>
+                        <div className="font-lg">{user}</div>
+                    </div>
+                    <div className="py-1">
+                        <button className="w-full flex items-center px-4 py-2 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600" onClick={handleProfile}>
+                            <User className="h-4 w-4 mr-3 " />
+                            Profile
+                        </button>
+                        <button className="w-full flex items-center px-4 py-2 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600">
+                            <Github className="h-4 w-4 mr-3 " />
+                            Github
+                        </button>
+                        <button className="w-full flex items-center px-4 py-2 text-red-600 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-600" onClick={handleLogout}>
+                            <LogOut className="h-4 w-4 mr-3 text-red-600" />
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    )
+}
+
+

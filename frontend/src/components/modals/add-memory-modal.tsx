@@ -14,8 +14,8 @@ import useAxiosPrivate from "../../hooks/useAxiosPrivate";
 export function AddMemoryModal() {
     const dispatch = useDispatch();
     const [activeTab, setActiveTab] = useState("Website");
-    const linkRef = useRef<HTMLInputElement>();
-    const noteRef =useRef<HTMLInputElement>();
+    const linkRef = useRef<HTMLInputElement>(null);
+    const noteRef =useRef<HTMLInputElement>(null);
     const axiosPrivate=useAxiosPrivate();
     const handleMemory = async () => {
         const link = linkRef.current?.value;

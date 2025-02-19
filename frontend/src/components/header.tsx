@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { setModalState } from "../redux/Slices/modalSlice";
 import { useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
+import { setUserModalState } from "../redux/Slices/userModalSlice";
 
 export function Header() {
     const dispatch = useDispatch();
@@ -25,7 +26,7 @@ export function Header() {
                     <div className="font-bold ">
                         Add memory
                     </div></Button>
-                <Button variant={"outline"} className="flex items-center rounded-full border-gray-300 shadow-md" >{username}</Button>
+                <Button variant={"outline"} className="flex items-center rounded-full border-gray-300 shadow-md" onClick={()=>dispatch(setUserModalState())}>{username}</Button>
             </div>
         </div>
     )
