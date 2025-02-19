@@ -10,6 +10,10 @@ const useAxiosPrivate = () => {
     const refresh = useRefreshToken();
     const token = sessionStorage.getItem('access_token');
 
+    // if(!token){
+    //     return false;
+    // }
+
     useEffect(() => {
 
         const requestIntercept = privateAxios.interceptors.request.use(

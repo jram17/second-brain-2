@@ -6,6 +6,7 @@ import { GitBranch, Github, LogOut, User } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { resetUserModalState } from "../../redux/Slices/userModalSlice";
 import { avatorColor } from "../header";
+import { toast } from "sonner";
 
 export function UserModal() {
     const dispatch = useDispatch();
@@ -16,11 +17,13 @@ export function UserModal() {
     const [user, setUser] = useState<String | null>('');
    
     function handleLogout() {
-        const token = sessionStorage.getItem("access_token");
-        const user = sessionStorage.getItem("username");
+        // const token = sessionStorage.getItem("access_token");
+        // const user = sessionStorage.getItem("username");
         sessionStorage.removeItem("access_token");
         sessionStorage.removeItem("username");
-        console.log({ token: token, user: user });
+
+        // console.log({ token: token, user: user });
+        toast.success("LogOut successfull!!")
         navigate("/home", { replace: true });
     }
     function handleProfile() {

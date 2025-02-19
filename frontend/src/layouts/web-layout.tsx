@@ -13,6 +13,11 @@ const WebLayout = () => {
         // const token = sessionStorage.getItem("access_token");
         // console.log("hit here");
         try {
+            const token= sessionStorage.getItem("access_token");
+            if (!token) {
+                navigate("/home", { replace: true });
+                return;
+            }
             const response = await axiosPrivate.get(
                 `${BASEURL}/api/v1/checkAuth`
                 // {
@@ -38,10 +43,11 @@ const WebLayout = () => {
         checkAuth();
         // console.log("hit");
     }, []);
+    
 
     return (
         <div>
-            <Header />
+            <Header path={location.pathname}/>
             <Outlet />
 
         </div>
