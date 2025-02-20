@@ -10,10 +10,14 @@ import { CircleX, TriangleAlert } from "lucide-react";
 
 import { BASEURL } from "../config/axiosConfig";
 import { Header } from "../components/header";
+import { useDispatch } from "react-redux";
+import { resetUserModalState } from "../redux/Slices/userModalSlice";
 export const Signin = () => {
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
     const navigate = useNavigate();
+    const dispatch= useDispatch()
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,7 +42,7 @@ export const Signin = () => {
                     },
                 }
             });
-
+            dispatch(resetUserModalState());
             navigate("/brain");
 
         } catch (error) {

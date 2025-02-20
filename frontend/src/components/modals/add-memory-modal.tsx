@@ -150,7 +150,7 @@ export function AddMemoryModal() {
                 {
                     activeTab === "Documents" &&
                     <div className="mt-4 rounded-md border border-purple-100 dark:bg-stone-900 dark:border-stone-700 p-4 shadow-md">
-                        <h1 className="text-sm font-semibold dark:text-gray-300 ">working Documents</h1></div>
+                        <h1 className="text-sm font-semibold dark:text-gray-300 ">working on Documents</h1></div>
                 }
 
                 {
