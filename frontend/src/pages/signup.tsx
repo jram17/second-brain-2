@@ -35,25 +35,25 @@ const Signup = () => {
         toast.error("user already existing");
       }
 
-      // axios.defaults.withCredentials = true;
-      // const response = await axios.post(`${BASEURL}/api/v1/signin`, {
-      //   username,
-      //   password,
-      // });
-      // console.log({ "response object :": response.data })
-      // sessionStorage.setItem("access_token", response.data.token);
-      // sessionStorage.setItem("username", String(username))
+      axios.defaults.withCredentials = true;
+      const response = await axios.post(`${BASEURL}/api/v1/signin`, {
+        username,
+        password,
+      });
+      console.log({ "response object :": response.data })
+      sessionStorage.setItem("access_token", response.data.token);
+      sessionStorage.setItem("username", String(username))
 
-      // toast.success(`Welcome back, ${username}!`, {
-      //   action: {
-      //     label: <CircleX className="text-gray-500 hover:text-red-500  cursor-pointer" />,
-      //     onClick: () => {
-      //       console.log("close");
-      //     },
-      //   }
-      // });
+      toast.success(`Welcome back, ${username}!`, {
+        action: {
+          label: <CircleX className="text-gray-500 hover:text-red-500  cursor-pointer" />,
+          onClick: () => {
+            console.log("close");
+          },
+        }
+      });
 
-      // navigate("/brain");
+      navigate("/brain");
 
     } catch (error) {
       console.log(error);
