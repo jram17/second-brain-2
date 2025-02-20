@@ -58,39 +58,39 @@ const Signup = () => {
     } catch (error) {
       console.log(error);
 
-      // console.error("Error during sign-in:", error);
+      console.error("Error during sign-in:", error);
 
-      // if (axios.isAxiosError(error)) {
-      //   const status = error.response?.status;
-      //   if (status === 411) {
-      //     toast.error("user already exits!!!");
-      //   }
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        if (status === 411) {
+          toast.error("user already exits!!!");
+        }
 
-      //   if (status === 400) {
-      //     toast.error("Please provide both username and password.");
-      //   } else if (status === 403) {
-      //     toast.error('Invalid credentials, Please try again!!!', {
+        if (status === 400) {
+          toast.error("user already exits");
+        } else if (status === 403) {
+          toast.error('Invalid credentials, Please try again!!!', {
 
-      //       action: {
-      //         label: <CircleX className="text-gray-500 hover:text-red-500 cursor-pointer" />,
-      //         onClick: () => toast.dismiss(),
-      //       },
-      //     });
-      //   } else if (status === 500) {
-      //     toast.error("Server error. Please try again later.", {
-      //       action: {
-      //         label: <CircleX className="text-gray-500 hover:text-red-500 cursor-pointer" />,
-      //         onClick: () => {
-      //           console.log("close");
-      //         },
-      //       }
-      //     });
-      //   } else {
-      //     toast.error("An unknown error occurred.");
-      //   }
-      // } else {
-      //   console.error("Unexpected error:", error);
-      // }
+            action: {
+              label: <CircleX className="text-gray-500 hover:text-red-500 cursor-pointer" />,
+              onClick: () => toast.dismiss(),
+            },
+          });
+        } else if (status === 500) {
+          toast.error("Server error. Please try again later.", {
+            action: {
+              label: <CircleX className="text-gray-500 hover:text-red-500 cursor-pointer" />,
+              onClick: () => {
+                console.log("close");
+              },
+            }
+          });
+        } else {
+          toast.error("An unknown error occurred.");
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
 
     }
   };

@@ -1,7 +1,8 @@
 
 
 
-import express from 'express';
+import express, { Application } from 'express';
+import { Request,Response } from 'express';
 import cors from 'cors';
 import { userMiddleware } from './middleware/auth';
 import { User } from './model/user-schema';
@@ -22,7 +23,7 @@ dotenv.config()
 
 
 const port = 3000;
-const app = express();
+const app:Application = express();
 app.use(express.json());
 app.use(cors({
     origin: 'http://localhost:5173',
@@ -33,23 +34,32 @@ app.use(cors({
 app.use(cookieParser());
 
 
+interface CustomResponseType{
+    status:boolean;
+    message:string;
+}
 
+interface SignupRequestBody {
+    username: string;
+    password: string;
+}
 
-app.post('/api/v1/signup', async (req, res) => {
+app.post('/api/v1/signup', async (req :Request, res:Response):Promise<void> => {
     const username = req.body.username;
     const password = req.body.password;
     try {
         const existingUser = await User.findOne({ username });
         if (existingUser) {
-            res.status(411).json({ message: 'User already exists' });
+            res.status(400).json({ status: false, message: "User already exists" });
+            return;
         }
         await User.create({
             username: username,
             password: password
         });
-        res.json({ message: 'User created successfully' });
+        res.status(201).json({ status: true, message: "User created successfully" });
     } catch (error) {
-        res.status(411).json({ message: error });
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
 });
 
